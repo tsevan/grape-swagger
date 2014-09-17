@@ -234,8 +234,12 @@ module Grape
 
                 raw_data_type = value.is_a?(Hash) ? (value[:type] || 'string').to_s : 'string'
                 data_type     = case raw_data_type
+                                when "Virtus::Attribute::Boolean"
+                                  "boolean"
                                 when 'Boolean', 'Date', 'Integer', 'String'
                                   raw_data_type.downcase
+                                when 'Float'
+                                  'string'
                                 when 'BigDecimal'
                                   'long'
                                 when 'DateTime'

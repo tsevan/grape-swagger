@@ -238,6 +238,8 @@ module Grape
                                   "boolean"
                                 when 'Boolean', 'Date', 'Integer', 'String', 'Float'
                                   raw_data_type.downcase
+                                when 'Array'
+                                  'string'
                                 when 'BigDecimal'
                                   'long'
                                 when 'DateTime'
@@ -253,6 +255,8 @@ module Grape
                 is_array      = value.is_a?(Hash) ? (value[:is_array] || false) : false
                 enum_values   = value.is_a?(Hash) ? value[:values] : nil
                 enum_values   = enum_values.call if enum_values && enum_values.is_a?(Proc)
+
+                is_array = true if raw_data_type == 'Array'
 
                 if value.is_a?(Hash) && value.key?(:param_type)
                   param_type  = value[:param_type]
@@ -289,6 +293,7 @@ module Grape
                 parsed_params.merge!(items: items) if items.present?
                 parsed_params.merge!(defaultValue: default_value) if default_value
                 parsed_params.merge!(enum: enum_values) if enum_values
+
                 parsed_params
               end
             end

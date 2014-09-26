@@ -228,7 +228,11 @@ module Grape
 
             def parse_params(params, path, method)
               params ||= []
-              params.map do |param, value|
+              results = []
+
+              params.each do |param, value|
+                next if value.is_a?(Hash) && value[:hidden]
+
                 value[:type] = 'File' if value.is_a?(Hash) && ['Rack::Multipart::UploadedFile', 'Hash'].include?(value[:type])
                 items = {}
 
@@ -276,6 +280,8 @@ module Grape
                 end
                 name          = (value.is_a?(Hash) && value[:full_name]) || param
 
+                next if results.select{|a| [name, name.to_sym].include?(a[:name])}.present?
+
                 parsed_params = {
                   paramType:     param_type,
                   name:          name,
@@ -290,12 +296,10 @@ module Grape
                 parsed_params.merge!(defaultValue: default_value) if default_value
                 parsed_params.merge!(enum: enum_values) if enum_values
 
-                if value.is_a?(Hash) && value[:hidden]
-                  nil
-                else
-                  parsed_params
-                end
-              end.compact
+                results << parsed_params
+              end
+
+              results
             end
 
             def content_types_for(target_class)
